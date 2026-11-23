@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Import Members | GymFlow Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/app.css?v=2">
+  <link rel="stylesheet" href="/static/css/import.css">
+  <link rel="icon" type="image/jpeg" href="/static/images/logo.jpg">
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="menu-toggle-btn" id="menuToggle" aria-label="Open navigation menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <img src="/static/images/logo.jpg" alt="Gold's Club Logo" class="brand-logo-img" width="36" height="36" style="width:36px; height:36px; max-width:36px; max-height:36px; object-fit:cover; border-radius:8px; display:block;">
+        </div>
+        <strong class="brand-name-mobile" id="brandMobile">Gym fees</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon" aria-hidden="true">
+          <img src="/static/images/logo.jpg" alt="Gold's Club Logo" class="brand-logo-img" width="36" height="36" style="width:36px; height:36px; max-width:36px; max-height:36px; object-fit:cover; border-radius:8px; display:block;">
+        </div>
+        <div class="brand-meta">
+          <strong class="brand" id="brand">Gym fees</strong>
+          <span class="brand-badge">Automated Hub</span>
+        </div>
+      </div>
+      <button class="sidebar-close-btn" id="sidebarClose" aria-label="Close menu">&times;</button>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-section-label">MAIN MENU</div>
+      <nav id="nav">
+        <a href="/#dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="/#members">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Members</span>
+        </a>
+
+        <a href="/#payments">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <span>Payments</span>
+        </a>
+
+        <a href="/#reminders">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Reminders</span>
+        </a>
+
+        <a href="/#reports">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span>Reports</span>
+        </a>
+
+        <a href="/#settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-section-label" style="margin-top:20px;">DATA & TOOLS</div>
+      <div class="sidebar-tools">
+        <a href="/import" class="sidebar-tool-link on">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Import Excel / CSV</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Sidebar Bottom Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-system-status">
+        <span class="status-indicator-dot"></span>
+        <div class="status-meta">
+          <span class="status-name">Local Workbook</span>
+          <span class="status-desc">Automated & Safe</span>
+        </div>
+      </div>
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle dark/light theme" aria-label="Toggle theme">
+        <svg id="themeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="themeIconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Backdrop overlay for mobile drawer -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Main Content Wrapper -->
+  <div class="app-main">
+    <header class="top-nav-bar">
+      <div class="top-bar-left">
+        <a href="/" class="back-link">&larr; Return to Dashboard</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <header class="top">
+        <h1>Import Members Spreadsheet</h1>
+        <p class="sub">Upload your gym's existing Excel (.xlsx) or CSV file. Auto-detect columns, verify matches, and sync without duplicates.</p>
+      </header>
+
+      <ol class="steps" id="steps">
+        <li data-step="1" class="on">Upload Spreadsheet</li>
+        <li data-step="2">Match Columns</li>
+        <li data-step="3">Results & Summary</li>
+      </ol>
+
+      <div id="alert" class="alert" role="alert" hidden></div>
+
+      <!-- Step 1 -->
+      <section id="step1" class="panel">
+        <label class="drop" id="drop" for="file">
+          <div class="drop-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <input type="file" id="file" accept=".xlsx,.csv" hidden>
+          <strong id="dropTitle">Choose a spreadsheet or drag & drop here</strong>
+          <span id="dropHint">Supports .xlsx and .csv files up to 10 MB</span>
+        </label>
+        <div class="row">
+          <button class="btn primary" id="btnPreview" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Inspect & Read File
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section id="step2" class="panel" hidden>
+        <h2>Verify Column Mapping</h2>
+        <p class="muted">We auto-matched your spreadsheet headers with member fields. Review and adjust any mismatches before proceeding.</p>
+
+        <div id="mapGrid" class="map-grid"></div>
+
+        <div id="dueConfirm" class="confirm" hidden>
+          <label>
+            <input type="checkbox" id="dueOk">
+            <span>The column mapped to <b>Due date</b> represents when the next recurring payment is due, not a membership expiration date.</span>
+          </label>
+        </div>
+
+        <div id="mapIssues" class="issues" hidden></div>
+
+        <h3>Preview Data <span class="muted" id="previewCount"></span></h3>
+        <div class="table-scroll"><table id="previewTable"></table></div>
+
+        <div class="row">
+          <button class="btn" id="btnBack">Choose Another File</button>
+          <button class="btn primary" id="btnImport" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm & Import Members
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section id="step3" class="panel" hidden>
+        <h2>Import Completed</h2>
+        <div class="counts">
+          <div class="count ok">
+            <b id="cntOk">0</b>
+            <span id="cntOkLabel">Members imported</span>
+          </div>
+          <div class="count bad">
+            <b id="cntBad">0</b>
+            <span>Rows rejected</span>
+          </div>
+        </div>
+        <div id="rejectBox" hidden>
+          <h3>Rejected Rows & Details</h3>
+          <p class="muted">Review the errors below. Fix them in your spreadsheet and upload again. Successfully imported members are never duplicated.</p>
+          <div class="table-scroll"><table id="rejectTable"></table></div>
+        </div>
+        <div class="row">
+          <a class="btn" href="/">Return to Dashboard</a>
+          <button class="btn primary" id="btnAgain">Import Another File</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="/static/js/import.js"></script>
+</body>
+</html>
