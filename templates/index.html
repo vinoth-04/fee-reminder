@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GymFlow | Fee & WhatsApp Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Mobile Header (Visible on small screens) -->
+  <header class="mobile-header">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="menu-toggle-btn" id="menuToggle" aria-label="Open navigation menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"/>
+          </svg>
+        </div>
+        <strong class="brand-name-mobile" id="brandMobile">Gym fees</strong>
+      </div>
+    </div>
+    <button class="theme-toggle-btn" id="mobileThemeToggle" aria-label="Toggle theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </header>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"/>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <strong class="brand" id="brand">Gym fees</strong>
+          <span class="brand-badge">Automated Hub</span>
+        </div>
+      </div>
+      <button class="sidebar-close-btn" id="sidebarClose" aria-label="Close menu">&times;</button>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-section-label">MAIN MENU</div>
+      <nav id="nav">
+        <a href="#dashboard" class="on">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="#members">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Members</span>
+        </a>
+
+        <a href="#payments">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <span>Payments</span>
+        </a>
+
+        <a href="#reminders">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Reminders</span>
+          <span id="navRemCount" class="nav-badge" style="display:none;">0</span>
+        </a>
+
+        <a href="#reports">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span>Reports</span>
+        </a>
+
+        <a href="#settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-section-label" style="margin-top:20px;">DATA & TOOLS</div>
+      <div class="sidebar-tools">
+        <a href="/import" class="sidebar-tool-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Import Excel / CSV</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Sidebar Bottom Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-system-status">
+        <span class="status-indicator-dot"></span>
+        <div class="status-meta">
+          <span class="status-name">Local Workbook</span>
+          <span class="status-desc">Automated & Safe</span>
+        </div>
+      </div>
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle dark/light theme" aria-label="Toggle theme">
+        <svg id="themeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="themeIconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Backdrop overlay for mobile drawer -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Main Content Wrapper -->
+  <div class="app-main">
+    <!-- Top Bar -->
+    <header class="top-nav-bar">
+      <div class="top-bar-left">
+        <span class="badge-date" id="currentDateBadge">Today</span>
+      </div>
+      <div class="top-bar-right">
+        <a class="btn small primary" href="#members" onclick="setTimeout(()=>document.getElementById('btnAddMember').click(),50)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Member
+        </a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div id="toast" class="toast" role="status" hidden></div>
+
+      <!-- ================= Dashboard ================= -->
+      <section id="view-dashboard" hidden>
+        <div class="hero-banner">
+          <div class="hero-content">
+            <h2>Gym Overview & Operations</h2>
+            <p>Monitor member subscriptions, track pending monthly fees, and prepare WhatsApp reminders.</p>
+          </div>
+          <div class="quick-actions">
+            <a class="btn primary" href="#members" onclick="setTimeout(()=>document.getElementById('btnAddMember').click(),50)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Member
+            </a>
+            <a class="btn" href="#payments">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Generate Billing
+            </a>
+            <a class="btn" href="/import">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Import Excel
+            </a>
+          </div>
+        </div>
+
+        <div class="ledger" id="ledger"></div>
+
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Due today
+        </h2>
+        <div class="table-scroll"><table id="dashDue"></table></div>
+        <p class="muted" id="dashOverdue"></p>
+      </section>
+
+      <!-- ================= Members ================= -->
+      <section id="view-members" hidden>
+        <div class="head">
+          <div>
+            <h1>Member Directory</h1>
+            <p class="muted">Manage all active and inactive gym members and fee structures.</p>
+          </div>
+          <div class="actions">
+            <button class="btn" id="btnExportMembers" title="Download roster as CSV">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+            <a class="btn" href="/import">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Import from Excel
+            </a>
+            <button class="btn primary" id="btnAddMember">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add member
+            </button>
+          </div>
+        </div>
+        <div class="filters">
+          <input type="search" id="memberQ" placeholder="🔍 Search name, member ID or phone..." aria-label="Search members">
+          <select id="memberStatus" aria-label="Filter by status">
+            <option value="">All statuses (Active & Inactive)</option>
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+        <div class="table-scroll"><table id="memberTable"></table></div>
+      </section>
+
+      <!-- ================= Payments ================= -->
+      <section id="view-payments" hidden>
+        <div class="head">
+          <div>
+            <h1>Payments & Billing</h1>
+            <p class="muted">Generate monthly billing, record payments received, and track payment modes.</p>
+          </div>
+          <div class="actions">
+            <button class="btn" id="btnExportPayments" title="Download payment records as CSV">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="gen">
+          <div class="gen-content">
+            <strong>⚡ Generate Monthly Billing</strong>
+            <p class="muted">Creates a Pending payment entry for each active gym member for the selected month. No payment is treated as pending until generated.</p>
+          </div>
+          <div class="actions">
+            <input type="month" id="genMonth" aria-label="Billing month">
+            <button class="btn primary" id="btnGenerate">Generate</button>
+          </div>
+        </div>
+
+        <div class="filters">
+          <select id="payStatus" aria-label="Payment status">
+            <option value="">All payments</option>
+            <option>Pending</option>
+            <option>Paid</option>
+          </select>
+          <input type="month" id="payMonth" aria-label="Filter by month">
+          <span class="muted" id="payTotals"></span>
+        </div>
+        <div class="table-scroll"><table id="payTable"></table></div>
+
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Monthly Revenue Summary
+        </h2>
+        <div class="table-scroll"><table id="paySummary"></table></div>
+      </section>
+
+      <!-- ================= Reminders ================= -->
+      <section id="view-reminders" hidden>
+        <div class="head">
+          <div>
+            <h1>WhatsApp Reminders</h1>
+            <p class="muted">Prepare personalized WhatsApp reminders for overdue and upcoming member payments. Nothing is sent without your explicit confirmation.</p>
+          </div>
+          <button class="btn primary" id="btnPrepare">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Prepare today's reminders
+          </button>
+        </div>
+
+        <h2>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Overdue
+        </h2>
+        <div class="table-scroll"><table id="remOverdue"></table></div>
+
+        <h2>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--warning);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Due today
+        </h2>
+        <div class="table-scroll"><table id="remToday"></table></div>
+
+        <h2>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--info);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Due soon (Upcoming)
+        </h2>
+        <div class="table-scroll"><table id="remSoon"></table></div>
+
+        <h2>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Reminder Log & Audit Trail
+        </h2>
+        <div class="table-scroll"><table id="remLogs"></table></div>
+      </section>
+
+      <!-- ================= Reports ================= -->
+      <section id="view-reports" hidden>
+        <div class="head">
+          <div>
+            <h1>Financial & Activity Reports</h1>
+            <p class="muted">Detailed ledger reports on collections, unpaid dues, and reminder dispatches.</p>
+          </div>
+          <button class="btn" onclick="window.print()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print Report
+          </button>
+        </div>
+
+        <h2>Monthly collection</h2>
+        <div class="table-scroll"><table id="repMonthly"></table></div>
+
+        <h2>Pending payments <span class="muted" id="repPendingTotal"></span></h2>
+        <div class="table-scroll"><table id="repPending"></table></div>
+
+        <h2>Reminder activity <span class="muted">(last 30 days)</span></h2>
+        <div class="table-scroll"><table id="repReminders"></table></div>
+      </section>
+
+      <!-- ================= Settings ================= -->
+      <section id="view-settings" hidden>
+        <div class="head">
+          <div>
+            <h1>System Settings</h1>
+            <p class="muted">Configure your gym identity, reminder schedule, and automated timing.</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start;">
+          <form id="settingsForm" class="form" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-sm);">
+            <label>Gym name <small>Appended to signature of WhatsApp reminders</small>
+              <input name="gym_name" id="settingGymName" maxlength="60" placeholder="e.g. Iron Forge Fitness"></label>
+
+            <label>Country code for phone numbers
+              <input name="default_country_code" inputmode="numeric" maxlength="3" placeholder="e.g. 91"></label>
+
+            <label>First reminder, days before due date
+              <input name="before_due_days" type="number" min="0" max="60"></label>
+
+            <label>Overdue reminder, days after due date
+              <input name="overdue_days" type="number" min="1" max="60"></label>
+
+            <label>Repeat follow-up every N days while unpaid
+              <input name="followup_days" type="number" min="1" max="60"></label>
+
+            <label>Prepare reminders daily at
+              <input name="scheduler_time" type="time"></label>
+
+            <p class="form-error" id="settingsErr" hidden></p>
+            <button class="btn primary" type="submit">Save settings</button>
+          </form>
+
+          <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:24px; box-shadow:var(--shadow-sm);">
+            <h3 style="margin-top:0;">WhatsApp Message Preview</h3>
+            <p class="muted">How your members see the message on WhatsApp:</p>
+
+            <div class="wa-chat-preview">
+              <div class="wa-bubble">
+                <div id="waPreviewText">Hello Rahul,
+
+Your gym membership fee of ₹1,500 is due on 25 November 2026.
+
+Please complete your payment on time.
+
+Thank you!
+Iron Forge Fitness</div>
+                <div class="wa-meta">
+                  <span>09:00 AM</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:#53bdeb;"><polyline points="18 6 9 17 4 12"/><polyline points="22 10 13 21 8 16"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Member dialog -->
+<dialog id="memberDlg">
+  <div class="modal-header">
+    <h2 id="memberDlgTitle">Add member</h2>
+    <button class="modal-close" type="button" data-close aria-label="Close">&times;</button>
+  </div>
+  <form id="memberForm" class="form">
+    <label>Full Name <input name="name" required maxlength="80" placeholder="e.g. Arun Kumar"></label>
+    <label>Phone (WhatsApp) <input name="phone" required inputmode="tel" placeholder="e.g. 9876543210"></label>
+    <label>Monthly Fee (₹) <input name="monthly_fee" required type="number" min="1" step="any" placeholder="e.g. 1500"></label>
+    <label>Joining Date <input name="joining_date" type="date"></label>
+    <label>Next Due Date <small>Leave empty to calculate automatically from joining day</small>
+      <input name="due_date" type="date"></label>
+    <label>Status
+      <select name="status"><option>Active</option><option>Inactive</option></select></label>
+    <p class="form-error" id="memberErr" hidden></p>
+    <div class="row">
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="submit">Save Member</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Paid dialog -->
+<dialog id="payDlg">
+  <div class="modal-header">
+    <h2>Record Payment</h2>
+    <button class="modal-close" type="button" data-close aria-label="Close">&times;</button>
+  </div>
+  <form id="payForm" class="form">
+    <p class="muted" id="payDlgInfo" style="font-weight:600; color:var(--ink-primary);"></p>
+    <label>Payment date <input name="payment_date" type="date" required></label>
+    <label>Payment mode
+      <select name="payment_mode">
+        <option>UPI</option>
+        <option>Cash</option>
+        <option>Bank Transfer</option>
+        <option>Other</option>
+      </select>
+    </label>
+    <label>Amount received (₹) <small>Adjust if paid partial or different amount</small>
+      <input name="amount" type="number" min="1" step="any"></label>
+    <p class="form-error" id="payErr" hidden></p>
+    <div class="row">
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="submit">Mark as paid</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- History dialog -->
+<dialog id="histDlg" style="width:min(640px,94vw);">
+  <div class="modal-header">
+    <h2 id="histTitle">Payment history</h2>
+    <button class="modal-close" type="button" data-close aria-label="Close">&times;</button>
+  </div>
+  <div class="form">
+    <div class="table-scroll"><table id="histTable"></table></div>
+    <div class="row"><button class="btn" data-close>Close</button></div>
+  </div>
+</dialog>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

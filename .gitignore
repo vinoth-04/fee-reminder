@@ -1,3 +1,4 @@
+
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -7,4 +8,22 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
+venv/
+
+# Excel files and temporary data
+data/*.xlsx
+data/backups/
+data/uploads/
+data/settings.json
+
+# WhatsApp browser profile (sensitive login/session data)
+gym_fee_automation/data/whatsapp_profile/
+
+# Database temporary files
+*.db-journal
+*.sqlite-journal
+
+# IDE
+.vscode/
+.idea/
