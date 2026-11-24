@@ -45,6 +45,16 @@ CREATE TABLE IF NOT EXISTS reminder_logs (
     UNIQUE (member_id, payment_month, reminder_type, reminder_date)
 );
 CREATE INDEX IF NOT EXISTS ix_logs_member_month ON reminder_logs (member_id, payment_month);
+
+CREATE TABLE IF NOT EXISTS inbox_messages (
+    message_id  TEXT PRIMARY KEY,
+    member_id   TEXT NOT NULL REFERENCES members (member_id),
+    received_at TEXT NOT NULL DEFAULT '',
+    body        TEXT NOT NULL,
+    seen        INTEGER NOT NULL DEFAULT 0,
+    fetched_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+);
+CREATE INDEX IF NOT EXISTS ix_inbox_member ON inbox_messages (member_id, seen);
 """
 
 _BUSY = "The database is busy. Try again in a moment."

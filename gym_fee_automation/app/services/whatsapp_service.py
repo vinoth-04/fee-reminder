@@ -3,6 +3,7 @@ link, checks the message and presses Send in WhatsApp themselves."""
 import re
 from urllib.parse import quote
 
+from app.config import DEFAULT_TEMPLATES, TEMPLATE_KEYS
 from app.services.validators import format_inr
 
 DEFAULT_COUNTRY_CODE = "91"
@@ -37,20 +38,19 @@ def _date_text(d) -> str:
     return f"{d.day} {d:%B %Y}"
 
 
-def build_message(reminder_type: str, name: str, amount, due, gym_name: str = "") -> str:
-    first = (name or "").split()[0] if name else "there"
-    fee = format_inr(amount)
-    if reminder_type == "Before Due":
-        body = (f"Your gym membership fee of {fee} is due on {_date_text(due)}.\n\n"
-                "Please complete your payment on time.")
-    elif reminder_type == "Due Date":
-        body = (f"This is a friendly reminder that your gym membership fee of {fee} is due today.\n\n"
-                "Please complete your payment.")
-    else:
-        body = (f"Our records show that your gym membership fee of {fee} is still pending.\n\n"
-                "Kindly complete the payment at your earliest convenience.")
-    sign = "Thank you!" + (f"\n{gym_name}" if gym_name else "")
-    return f"Hello {first},\n\n{body}\n\n{sign}"
+def render_template(template: str, name: str, amount, due, gym_name: str = "") -> str:
+    """Fill {name}, {full_name}, {amount}, {due_date}, {gym_name}. Unknown {words} are left as typed."""
+    full = (name or "").strip()
+    values = {"name": full.split()[0] if full else "there", "full_name": full or "there",
+              "amount": format_inr(amount), "due_date": _date_text(due) if due else "",
+              "gym_name": gym_name or ""}
+    return re.sub(r"\{(\w+)\}", lambda m: values.get(m.group(1), m.group(0)), template or "").strip()
+
+
+def build_message(reminder_type: str, name: str, amount, due, gym_name: str = "", template: str | None = None) -> str:
+    """template=None uses the default text for this reminder type."""
+    template = template or DEFAULT_TEMPLATES[TEMPLATE_KEYS[reminder_type]]
+    return render_template(template, name, amount, due, gym_name)
 
 
 def build_link(phone: str, message: str) -> str:

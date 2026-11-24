@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app import config, db as _db
 from app.errors import AppError
 from app.routes import (dashboard_routes, member_routes, payment_routes, reminder_routes,
-                        upload_routes, whatsapp_routes)
+                        upload_routes, whatsapp_routes, inbox_routes)
 from app.scheduler import jobs
 from app.services import excel_service
 
@@ -35,7 +35,8 @@ async def app_error_handler(request: Request, exc: AppError):
 
 
 for r in (member_routes.router, payment_routes.router, reminder_routes.router,
-          upload_routes.router, dashboard_routes.router, whatsapp_routes.router):
+          upload_routes.router, dashboard_routes.router, whatsapp_routes.router,
+          inbox_routes.router):
     app.include_router(r)
 
 app.mount("/static", StaticFiles(directory=config.BASE_DIR / "static"), name="static")

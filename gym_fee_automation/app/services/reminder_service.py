@@ -7,6 +7,7 @@ from app.errors import AppError
 from app.services import excel_service as xs
 from app.services.due_date_service import anchor_day, due_date_for_month, parse_date
 from app.services.validators import normalize_phone, parse_fee
+from app.config import TEMPLATE_KEYS
 from app.services import whatsapp_session
 from app.services.whatsapp_service import build_link, build_message
 
@@ -64,7 +65,7 @@ def _item(it: dict, kind: str, s: dict, logs: list, today: date) -> dict:
     m, p, due = it["member"], it["payment"], it["due"]
     rtype = KIND_TO_TYPE[kind]
     amount = parse_fee(p["amount"]) or 0
-    message = build_message(rtype, m["name"], amount, due, s["gym_name"])
+    message = build_message(rtype, m["name"], amount, due, s["gym_name"], s[TEMPLATE_KEYS[rtype]])
     phone = normalize_phone(m["phone"], s["default_country_code"])
     last = max(logs, key=lambda l: l["reminder_id"]) if logs else None
     return {
@@ -117,7 +118,8 @@ def _new_log(wb, it, rtype, s, today):
         "reminder_id": xs.next_id(wb["Reminder Logs"], "reminder_id", "R", 6),
         "member_id": m["member_id"], "payment_month": p["payment_month"],
         "reminder_date": today.isoformat(), "reminder_type": rtype,
-        "message": build_message(rtype, m["name"], parse_fee(p["amount"]) or 0, it["due"], s["gym_name"]),
+        "message": build_message(rtype, m["name"], parse_fee(p["amount"]) or 0, it["due"], s["gym_name"],
+                                 s[TEMPLATE_KEYS[rtype]]),
         "status": "Prepared", "sent_at": "",
     }
     xs.append_row(wb["Reminder Logs"], log)

@@ -39,6 +39,13 @@ SEL_SEND = "button[aria-label='Send'], span[data-icon='send']"
 SEL_POPUP = "div[data-animate-modal-popup='true'], div[role='dialog']"
 SEL_POPUP_OK = "div[data-animate-modal-popup='true'] button, div[role='dialog'] button"
 
+# Reads the last N incoming bubbles of the open chat: [{meta: "[10:30 am, 24/11/2026] Name: ", text: "..."}]
+JS_READ_INCOMING = """(limit) => Array.from(document.querySelectorAll('div.message-in')).slice(-limit).map(el => {
+  const meta = el.querySelector('[data-pre-plain-text]');
+  const txt = el.querySelector('span.selectable-text, [data-testid="selectable-text"]');
+  return { meta: meta ? meta.getAttribute('data-pre-plain-text') : '', text: txt ? txt.innerText : '' };
+})"""
+
 DISCONNECTED, STARTING, QR, CONNECTED, ERROR = "disconnected", "starting", "qr", "connected", "error"
 
 
@@ -217,6 +224,34 @@ class _Session:
         finally:
             self._last_send = time.time()
 
+    def _read_sync(self, phone: str, limit: int) -> tuple[bool, str, list]:
+        """Open one member's chat and read their latest incoming messages (read-only)."""
+        try:
+            if self._page is None or self._page.is_closed():
+                self._set(ERROR, "The WhatsApp browser was closed. Click Connect again.")
+                return False, "WhatsApp browser is not running. Reconnect WhatsApp.", []
+            wait = random.uniform(MIN_DELAY, MAX_DELAY) - (time.time() - self._last_send)
+            if self._last_send and wait > 0:
+                time.sleep(wait)
+            self._page.goto(f"https://web.whatsapp.com/send?phone={phone}",
+                            wait_until="domcontentloaded", timeout=45000)
+            try:
+                self._page.wait_for_selector(SEL_COMPOSE, timeout=30000)
+            except Exception:
+                if self._visible(SEL_QR, 500):
+                    self._set(DISCONNECTED, "WhatsApp was unlinked from the phone. Connect again.", None)
+                    return False, "WhatsApp is no longer linked. Reconnect WhatsApp.", []
+                if self._popup_invalid():
+                    return False, "Phone number is invalid or not on WhatsApp.", []
+                return False, "Chat did not load.", []
+            time.sleep(1.5)                                   # let the history render
+            return True, "", self._page.evaluate(JS_READ_INCOMING, limit) or []
+        except Exception as e:
+            logger.exception("WhatsApp read for %s failed", mask_phone(phone))
+            return False, str(e), []
+        finally:
+            self._last_send = time.time()
+
     def _disconnect_sync(self, forget: bool):
         self._close_browser()
         if forget:
@@ -240,6 +275,11 @@ class _Session:
             return False, "WhatsApp is not connected."
         return self._pool.submit(self._send_sync, phone, text).result()
 
+    def read_replies(self, phone: str, limit: int = 5) -> tuple[bool, str, list]:
+        if not self.is_connected():
+            return False, "WhatsApp is not connected.", []
+        return self._pool.submit(self._read_sync, phone, limit).result()
+
     def disconnect(self, forget: bool = False) -> dict:
         self._pool.submit(self._disconnect_sync, forget).result()
         return self.status()
@@ -254,6 +294,7 @@ class _Session:
 _session = _Session()
 status, qr_png, is_connected = _session.status, _session.qr_png, _session.is_connected
 connect, send, disconnect, shutdown = _session.connect, _session.send, _session.disconnect, _session.shutdown
+read_replies = _session.read_replies
 
 
 def send_to(phone: str, text: str) -> tuple[bool, str]:
@@ -262,3 +303,10 @@ def send_to(phone: str, text: str) -> tuple[bool, str]:
     if not clean:
         return False, "Phone number is empty or invalid."
     return send(clean, text)
+
+
+def read_replies_for(phone: str, limit: int = 5) -> tuple[bool, str, list]:
+    clean = normalize_phone(phone, config.load_settings()["default_country_code"])
+    if not clean:
+        return False, "Phone number is empty or invalid.", []
+    return read_replies(clean, limit)

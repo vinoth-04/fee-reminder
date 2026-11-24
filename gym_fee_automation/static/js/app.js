@@ -142,6 +142,7 @@
     members: loadMembers,
     payments: loadPayments,
     reminders: loadReminders,
+    replies: loadReplies,
     reports: loadReports,
     settings: loadSettings
   };
@@ -1143,12 +1144,68 @@
   const settingDefaultFeeInput = $("settingDefaultFeeInput");
   const settingFeeOptionsInput = $("settingFeeOptionsInput");
 
+  /* ---- Message templates: placeholders, live preview, reset ---- */
+  const TPL_PLACEHOLDERS = ["name", "full_name", "amount", "due_date", "gym_name"];
+  let activeTplEl = null;
+  const tplEls = () => Array.from(settingsForm.querySelectorAll("textarea[data-tpl]"));
+
+  function renderTpl(text, gymName, fee) {
+    const vals = {
+      name: "Rahul", full_name: "Rahul Kumar",
+      amount: "₹" + Number(fee).toLocaleString("en-IN"),
+      due_date: "25 November 2026", gym_name: gymName
+    };
+    return text.replace(/\{(\w+)\}/g, (m, k) => (k in vals ? vals[k] : m)).trim();
+  }
+
   function updateWaPreview(gymName, feeVal) {
     const preview = $("waPreviewText");
     if (!preview) return;
     const name = gymName || appSettings.gym_name || "Your Gym Name";
     const fee = feeVal || appSettings.default_monthly_fee || 1500;
-    preview.textContent = `Hello Rahul,\n\nYour gym membership fee of ₹${Number(fee).toLocaleString("en-IN")} is due on 25 November 2026.\n\nPlease complete your payment on time.\n\nThank you!\n${name}`;
+    const ta = activeTplEl || tplEls()[0];
+    if (ta && ta.value.trim()) {
+      preview.textContent = renderTpl(ta.value, name, fee);
+      if ($("waPreviewKind")) $("waPreviewKind").textContent = ta.dataset.tpl;
+    } else {
+      preview.textContent = `Hello Rahul,\n\nYour gym membership fee of ₹${Number(fee).toLocaleString("en-IN")} is due on 25 November 2026.\n\nPlease complete your payment on time.\n\nThank you!\n${name}`;
+    }
+  }
+
+  function currentPreviewArgs() {
+    return [gymNameInput ? gymNameInput.value.trim() : "", settingDefaultFeeInput ? settingDefaultFeeInput.value : null];
+  }
+
+  const chipBox = $("tplChips");
+  if (chipBox) {
+    TPL_PLACEHOLDERS.forEach(p => {
+      chipBox.appendChild(btn("{" + p + "}", () => {
+        const ta = activeTplEl || tplEls()[0];
+        if (!ta) return;
+        const text = "{" + p + "}";
+        const start = ta.selectionStart ?? ta.value.length;
+        const end = ta.selectionEnd ?? ta.value.length;
+        ta.value = ta.value.slice(0, start) + text + ta.value.slice(end);
+        ta.focus();
+        ta.setSelectionRange(start + text.length, start + text.length);
+        updateWaPreview(...currentPreviewArgs());
+      }, "btn small"));
+    });
+  }
+  tplEls().forEach(ta => {
+    ta.addEventListener("focus", () => { activeTplEl = ta; updateWaPreview(...currentPreviewArgs()); });
+    ta.addEventListener("input", () => updateWaPreview(...currentPreviewArgs()));
+  });
+  if ($("btnTplReset")) {
+    $("btnTplReset").addEventListener("click", guard(async () => {
+      if (!confirm("Replace all three message templates with the default text? (Press Save settings to keep it.)")) return;
+      const defaults = await api("/api/settings/template-defaults");
+      tplEls().forEach(ta => {
+        const key = ta.name;
+        if (defaults[key]) ta.value = defaults[key];
+      });
+      updateWaPreview(...currentPreviewArgs());
+    }));
   }
 
   if (gymNameInput) {
@@ -1434,6 +1491,71 @@
       toast(`Auto-send finished: ${ok} sent, ${bad} failed.`, bad > 0);
       await loadReminders();
     }
+  }));
+
+
+  /* ==========================================================================
+     Replies inbox (best-effort, read from the linked WhatsApp on demand)
+     ========================================================================== */
+  const chatPhone = p => {
+    const d = String(p || "").replace(/\D/g, "");
+    return d.length === 10 ? (appSettings.default_country_code || "91") + d : d;
+  };
+
+  async function loadReplies() {
+    const [groups] = await Promise.all([api("/api/inbox"), refreshWaStatus()]);
+    const connected = waStatus.state === "connected";
+    $("btnSyncReplies").disabled = !connected || !!repPoll;
+    $("btnSyncReplies").title = connected ? "" : "Connect WhatsApp on the Reminders page first";
+    if (!connected && !repPoll) {
+      $("repSyncStatus").textContent = "WhatsApp is not connected. Connect it on the Reminders page to fetch replies.";
+    }
+    renderTable($("repTable"), [
+      { h: "Member", f: g => `${g.name} (${g.member_id})`, cls: "nowrap" },
+      {
+        h: "Latest replies",
+        f: g => el("div", {}, ...g.messages.slice(0, 3).map(m =>
+          el("div", { style: "margin-bottom:6px;" },
+            el("small", { className: "muted", textContent: (m.received_at ? m.received_at + "  " : "") }),
+            document.createTextNode(m.body))))
+      },
+      { h: "Status", f: g => (g.unseen ? chip(`${g.unseen} new`, "warn") : chip("Read", "grey")), cls: "nowrap" },
+      {
+        h: "Actions",
+        cls: "nowrap",
+        f: g => el("div", { className: "row-actions" },
+          el("a", { className: "btn small whatsapp", href: `https://wa.me/${chatPhone(g.phone)}`, target: "_blank", rel: "noopener", textContent: "Open chat" }),
+          g.unseen ? btn("Mark read", guard(async () => {
+            await api(`/api/inbox/${encodeURIComponent(g.member_id)}/seen`, { method: "PUT" });
+            loadReplies();
+          })) : null)
+      }
+    ], groups, "No replies yet. Send reminders, then click \u201cCheck for replies\u201d.");
+  }
+
+  let repPoll = null;
+
+  async function pollReplySync() {
+    const st = await api("/api/inbox/sync/status");
+    if (st.running) {
+      $("repSyncStatus").textContent = `Checking chats: ${st.done} of ${st.total} (${st.new} new so far). Keep this page open.`;
+      return;
+    }
+    clearInterval(repPoll);
+    repPoll = null;
+    $("repSyncStatus").textContent = st.error
+      ? `Stopped: ${st.error}`
+      : `Done. ${st.new} new message(s)` + (st.skipped ? `, ${st.skipped} chat(s) skipped` : "") + (st.total ? "." : ". No members were sent a reminder recently.");
+    loadReplies();
+  }
+
+  $("btnSyncReplies").addEventListener("click", guard(async () => {
+    const st = await api("/api/inbox/sync", { method: "POST" });
+    $("btnSyncReplies").disabled = true;
+    if (!st.running) return pollReplySync();
+    clearInterval(repPoll);
+    repPoll = setInterval(guard(pollReplySync), 3000);
+    pollReplySync();
   }));
 
   initDateBadge();

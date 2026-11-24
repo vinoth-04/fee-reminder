@@ -18,6 +18,21 @@ MAX_UPLOAD_MB = 10
 MAX_UPLOAD_ROWS = 20000
 KEEP_BACKUPS = 30
 
+# Editable WhatsApp message templates. Placeholders: {name} (first name), {full_name},
+# {amount}, {due_date}, {gym_name}.
+TEMPLATE_PLACEHOLDERS = ("name", "full_name", "amount", "due_date", "gym_name")
+TEMPLATE_KEYS = {"Before Due": "template_before_due", "Due Date": "template_due_date",
+                 "Overdue": "template_overdue"}
+DEFAULT_TEMPLATES = {
+    "template_before_due": ("Hello {name},\n\nYour gym membership fee of {amount} is due on {due_date}.\n\n"
+                            "Please complete your payment on time.\n\nThank you!\n{gym_name}"),
+    "template_due_date": ("Hello {name},\n\nThis is a friendly reminder that your gym membership fee of "
+                          "{amount} is due today.\n\nPlease complete your payment.\n\nThank you!\n{gym_name}"),
+    "template_overdue": ("Hello {name},\n\nOur records show that your gym membership fee of {amount} is still "
+                         "pending.\n\nKindly complete the payment at your earliest convenience.\n\n"
+                         "Thank you!\n{gym_name}"),
+}
+
 DEFAULT_SETTINGS = {
     "gym_name": "",
     "default_country_code": "91",
@@ -27,6 +42,7 @@ DEFAULT_SETTINGS = {
     "scheduler_time": "09:00",
     "default_monthly_fee": 1500,
     "monthly_fee_options": "500, 800, 1000, 1200, 1500, 2000, 2500, 3000, 5000",
+    **DEFAULT_TEMPLATES,
 }
 
 
@@ -83,6 +99,17 @@ def update_settings(patch: dict) -> dict:
                 errors.append("Monthly fee options must contain at least one valid number.")
             else:
                 settings[key] = ", ".join(valid_opts)
+        elif key in DEFAULT_TEMPLATES:
+            value = str(value).replace("\r\n", "\n").strip()
+            if not value:
+                value = DEFAULT_TEMPLATES[key]          # empty box = back to the default text
+            elif len(value) > 900:
+                errors.append("A message template must be 900 characters or fewer.")
+            else:
+                bad = sorted({p for p in re.findall(r"\{(\w*)\}", value) if p not in TEMPLATE_PLACEHOLDERS})
+                if bad:
+                    errors.append("Unknown placeholder " + ", ".join("{" + b + "}" for b in bad) +
+                                  ". Use only: " + ", ".join("{" + p + "}" for p in TEMPLATE_PLACEHOLDERS) + ".")
         else:
             try:
                 value = int(value)

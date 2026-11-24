@@ -69,11 +69,19 @@ class SettingsIn(BaseModel):
     scheduler_time: str | None = None
     default_monthly_fee: float | None = None
     monthly_fee_options: str | None = None
+    template_before_due: str | None = None
+    template_due_date: str | None = None
+    template_overdue: str | None = None
 
 
 @router.get("/api/settings")
 def get_settings():
     return config.load_settings()
+
+
+@router.get("/api/settings/template-defaults")
+def template_defaults():
+    return config.DEFAULT_TEMPLATES
 
 
 @router.put("/api/settings")
