@@ -1,7 +1,8 @@
 from fastapi import APIRouter
+from fastapi.responses import Response
 from pydantic import BaseModel
 
-from app.services import payment_service as svc
+from app.services import invoice_service, payment_service as svc
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 
@@ -45,3 +46,12 @@ def generate(body: GenerateIn):
 @router.put("/{payment_id}/paid")
 def mark_paid(payment_id: str, body: PaidIn):
     return svc.mark_paid(payment_id, body.payment_date, body.payment_mode, body.amount)
+
+
+
+@router.get("/{payment_id}/invoice")
+def invoice(payment_id: str, download: bool = False):
+    pdf, filename = invoice_service.build_invoice_pdf(payment_id)
+    disposition = "attachment" if download else "inline"
+    return Response(pdf, media_type="application/pdf",
+                    headers={"Content-Disposition": f'{disposition}; filename="{filename}"'})

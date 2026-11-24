@@ -4,3 +4,8 @@ data/*.xlsx
 data/backups/
 data/uploads/
 data/settings.json
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/whatsapp_profile/
+data/whatsapp_sent_today.json

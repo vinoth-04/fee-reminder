@@ -359,6 +359,20 @@
             </div>
           </div>
 
+
+          <!-- WhatsApp link (optional QR link; click-to-chat always works without it) -->
+          <div class="gen" id="waLinkBar">
+            <div class="gen-content">
+              <strong>WhatsApp link <span id="waLinkChip"></span></strong>
+              <p class="muted" id="waLinkText">Checking...</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="btnWaDisconnect" hidden>Disconnect</button>
+              <button class="btn whatsapp" id="btnAutoSend" hidden>Auto-send all</button>
+              <button class="btn primary" id="btnWaConnect">Connect WhatsApp</button>
+            </div>
+          </div>
+
           <!-- Shown only when there are no pending payments at all -->
           <div class="gen" id="remHint" hidden>
             <div class="gen-content">
@@ -640,7 +654,7 @@
             <line x1="8" y1="21" x2="16" y2="21"/>
             <line x1="12" y1="17" x2="12" y2="21"/>
           </svg>
-          Single Tab: web.whatsapp.com
+          Single tab: WhatsApp click-to-chat
         </span>
       </div>
       <button class="modal-close" type="button" data-close aria-label="Close">&times;</button>
@@ -739,6 +753,19 @@
   </dialog>
 
   <!-- History dialog -->
+  <dialog id="waConnectDlg" style="width:min(420px,94vw);">
+    <div class="modal-header">
+      <h2>Connect WhatsApp</h2>
+      <button class="modal-close" type="button" data-close aria-label="Close">&times;</button>
+    </div>
+    <div class="form" style="text-align:center;">
+      <img id="waQrImg" alt="WhatsApp QR code" hidden style="width:260px;height:260px;margin:0 auto;border-radius:8px;background:#fff;">
+      <p id="waQrMsg" class="muted">Starting...</p>
+      <p class="muted" style="font-size:.85rem;">Use the gym's own WhatsApp number. Linking is unofficial: send only to members who expect the message and keep volume low.</p>
+      <div class="row"><button class="btn" data-close>Close</button></div>
+    </div>
+  </dialog>
+
   <dialog id="histDlg" style="width:min(640px,94vw);">
     <div class="modal-header">
       <h2 id="histTitle">Payment history</h2>

@@ -30,6 +30,11 @@ def send_one(payment_id: str):
     return svc.send_reminder(payment_id)
 
 
+@router.post("/mark-sent/{payment_id}")
+def mark_sent(payment_id: str):
+    return svc.mark_sent(payment_id)
+
+
 @router.get("/logs")
 def logs(limit: int = 100, status: str = ""):
     return svc.get_logs(limit, status)

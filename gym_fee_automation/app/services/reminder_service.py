@@ -7,7 +7,8 @@ from app.errors import AppError
 from app.services import excel_service as xs
 from app.services.due_date_service import anchor_day, due_date_for_month, parse_date
 from app.services.validators import normalize_phone, parse_fee
-from app.services.whatsapp_service import build_link, build_message, send_message
+from app.services import whatsapp_session
+from app.services.whatsapp_service import build_link, build_message
 
 KIND_TO_TYPE = {"due_soon": "Before Due", "due_today": "Due Date", "overdue": "Overdue"}
 STATUSES = ["Prepared", "Sent", "Failed"]
@@ -169,25 +170,32 @@ def prepare_for_payment(payment_id: str, today: date | None = None) -> dict:
     raise AppError(404, "No pending payment found for an active member with that ID.")
 
 
+def mark_sent(payment_id: str, today: date | None = None) -> dict:
+    """Admin pressed Send in WhatsApp: make sure today's reminder log exists and mark it Sent."""
+    reminder_id = prepare_for_payment(payment_id, today)["reminder_id"]
+    res = set_status(reminder_id, "Sent")
+    return {"reminder_id": reminder_id, "status": "Sent", "success": True,
+            "error": "", "sent_at": res.get("sent_at", "")}
+
+
 def send_reminder(payment_id: str, today: date | None = None) -> dict:
-    """Send reminder through Playwright WhatsApp service and update log."""
-    prep = prepare_for_payment(payment_id, today)
-    reminder_id = prep["reminder_id"]
-    wb = xs.read_all()
-    logs = xs.records(wb["Reminder Logs"])
-    log = next((l for l in logs if l["reminder_id"] == reminder_id), None)
+    """Auto-send through the linked WhatsApp. Raises 409 if not linked (the UI then falls back
+    to click-to-chat) and 429 once the daily safety cap is reached."""
+    if not whatsapp_session.is_connected():
+        raise AppError(409, "WhatsApp is not connected. Connect it, or use Open WhatsApp.")
+    st = whatsapp_session.status()
+    if st["sent_today"] >= st["daily_cap"]:
+        raise AppError(429, f"Daily auto-send limit reached ({st['daily_cap']}). Use Open WhatsApp for the rest.")
+    reminder_id = prepare_for_payment(payment_id, today)["reminder_id"]
+    log = next((l for l in xs.records(xs.read_all()["Reminder Logs"]) if l["reminder_id"] == reminder_id), None)
     if not log:
         raise AppError(404, f"Reminder log {reminder_id} not found.")
     with _db.read() as conn:
-        m_rows = _db.rows(conn, "SELECT member_id, name, phone FROM members WHERE member_id = ?", (log["member_id"],))
-    m = m_rows[0] if m_rows else {}
-    phone = m.get("phone", "")
-    message = log.get("message", "")
-
-    ok, error = send_message(phone, message)
-    final_status = "Sent" if ok else "Failed"
-    res = set_status(reminder_id, final_status)
-    return {"reminder_id": reminder_id, "status": final_status, "success": ok, "error": error, "sent_at": res.get("sent_at", "")}
+        m = _db.rows(conn, "SELECT phone FROM members WHERE member_id = ?", (log["member_id"],))
+    ok, error = whatsapp_session.send_to(m[0]["phone"] if m else "", log.get("message", ""))
+    res = set_status(reminder_id, "Sent" if ok else "Failed")
+    return {"reminder_id": reminder_id, "status": res["status"], "success": ok, "error": error,
+            "sent_at": res.get("sent_at", "")}
 
 
 def get_logs(limit: int = 100, status: str = "") -> list[dict]:

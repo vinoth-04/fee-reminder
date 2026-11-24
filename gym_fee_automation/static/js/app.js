@@ -500,12 +500,17 @@
       { h: "Amount", f: r => inr(r.amount), cls: "num" },
       { h: "Status", f: r => chip(r.payment_status, r.payment_status === "Paid" ? "" : "warn") },
       { h: "Paid on", f: r => niceDate(r.payment_date) },
-      { h: "Mode", f: r => r.payment_mode || "—" }
+      { h: "Mode", f: r => r.payment_mode || "—" },
+      { h: "Invoice", f: r => r.payment_status === "Paid" ? btn("Invoice", () => openInvoice(r.payment_id)) : "" }
     ], rows, "No payment records for this member yet.");
     $("histDlg").showModal();
   }
 
   /* ---------------- Payments ---------------- */
+  function openInvoice(paymentId) {
+    window.open(`/api/payments/${encodeURIComponent(paymentId)}/invoice`, "_blank");
+  }
+
   async function loadPayments() {
     if (!$("genMonth").value) $("genMonth").value = thisMonth();
     const qs = new URLSearchParams({
@@ -526,7 +531,9 @@
       {
         h: "Action",
         cls: "nowrap",
-        f: r => r.payment_status === "Pending" ? btn("Mark Paid", () => openPayDialog(r), "btn small primary") : ""
+        f: r => r.payment_status === "Pending"
+          ? btn("Mark Paid", () => openPayDialog(r), "btn small primary")
+          : btn("Invoice", () => openInvoice(r.payment_id))
       }
     ], rows, "No payment records found. Generate billing for a month to begin.");
 
@@ -611,14 +618,10 @@
     : chip(l.status, l.status === "Sent" ? "" : l.status === "Failed" ? "bad" : "warn");
 
   async function openWhatsApp(r) {
-    toast(`Sending WhatsApp message to ${r.name}...`);
+    // Open first (inside the click) so the browser doesn't block the popup.
+    waQueueManager.openChatInTab(r.whatsapp_link);
     try {
-      const res = await api(`/api/reminders/send/${encodeURIComponent(r.payment_id)}`, { method: "POST" });
-      if (res.success) {
-        toast(`WhatsApp message sent to ${r.name}.`);
-      } else {
-        toast(`Failed to send to ${r.name}: ${res.error}`, true);
-      }
+      await prepareLog(r);
     } catch (e) {
       toast(e.message, true);
     }
@@ -664,6 +667,9 @@
         h: "Actions",
         cls: "nowrap",
         f: r => el("div", { className: "row-actions" },
+          waStatus.state === "connected" && (!r.last_log || r.last_log.status !== "Sent")
+            ? btn("Send now", () => sendNow(r), "btn small primary", { disabled: !r.phone_valid })
+            : null,
           btn("Open WhatsApp", () => openWhatsApp(r), "btn small whatsapp", { disabled: !r.phone_valid }),
           r.last_log && r.last_log.status !== "Sent"
             ? btn("Mark Sent", markLog(r.last_log.reminder_id, "Sent"), "btn small")
@@ -673,13 +679,15 @@
     ];
   }
 
+  let waStatus = { state: "disconnected", installed: true, sent_today: 0, daily_cap: 0 };
   let lastRem = { overdue: [], due_today: [], due_soon: [] };
 
   async function loadReminders() {
     const [rem, logs, pend] = await Promise.all([
       api("/api/reminders"),
       api("/api/reminders/logs?limit=50"),
-      api("/api/payments/pending")
+      api("/api/payments/pending"),
+      refreshWaStatus()
     ]);
     lastRem = rem;
     $("remHint").hidden = pend.length > 0;   // no bills generated yet -> show the banner
@@ -889,18 +897,12 @@
       this.isProcessing = true;
       const cur = this.queue[this.idx];
 
-      toast(`Sending WhatsApp message to ${cur.name}...`);
       try {
-        const res = await api(`/api/reminders/send/${encodeURIComponent(cur.payment_id)}`, { method: "POST" });
-        if (res.success) {
-          this.completedCount++;
-          toast(`WhatsApp reminder sent to ${cur.name}.`);
-        } else {
-          this.failedCount++;
-          toast(`Failed to send to ${cur.name}: ${res.error}`, true);
-        }
+        await api(`/api/reminders/mark-sent/${encodeURIComponent(cur.payment_id)}`, { method: "POST" });
+        this.completedCount++;
+        toast(`Marked as sent: ${cur.name}.`);
       } catch (e) {
-        toast(`Error sending to ${cur.name}: ${e.message}`, true);
+        toast(`Could not record ${cur.name}: ${e.message}`, true);
         this.failedCount++;
       } finally {
         this.isProcessing = false;
@@ -1290,6 +1292,150 @@
 
   initTheme();
   initSidebar();
+
+  /* ==========================================================================
+     WhatsApp link (optional QR link). Click-to-chat keeps working without it.
+     ========================================================================== */
+  async function refreshWaStatus() {
+    try {
+      waStatus = await api("/api/whatsapp/status");
+    } catch {
+      /* keep last known status */
+    }
+    renderWaBar();
+    return waStatus;
+  }
+
+  function renderWaBar() {
+    const bar = $("waLinkBar");
+    if (!bar) return;
+    const st = waStatus;
+    const chipEl = $("waLinkChip");
+    chipEl.replaceChildren();
+    const connected = st.state === "connected";
+    const label = { connected: "Connected", qr: "Waiting for scan", starting: "Connecting", error: "Problem" }[st.state] || "Not connected";
+    const kind = connected ? "" : st.state === "error" ? "bad" : st.state === "disconnected" ? "grey" : "warn";
+    chipEl.appendChild(chip(label, kind));
+
+    let text;
+    if (!st.installed) text = "Auto-send needs Playwright (pip install playwright). Click-to-chat works without it.";
+    else if (connected) text = `Auto-send is on. ${st.sent_today} of ${st.daily_cap} sent today (daily safety limit).`;
+    else if (st.state === "error") text = st.message || "Something went wrong. Try connecting again.";
+    else if (st.state === "qr" || st.state === "starting") text = st.message || "Connecting...";
+    else text = "Not linked. Reminders use click-to-chat (Open WhatsApp). Link the gym's WhatsApp to send automatically.";
+    $("waLinkText").textContent = text;
+
+    $("btnAutoSend").hidden = !connected;
+    $("btnWaDisconnect").hidden = !connected && !st.has_saved_session;
+    const cb = $("btnWaConnect");
+    cb.hidden = connected;
+    cb.disabled = !st.installed;
+    cb.textContent = st.state === "qr" || st.state === "starting" ? "Show QR"
+      : st.has_saved_session ? "Reconnect WhatsApp" : "Connect WhatsApp";
+  }
+
+  let waPoll = null;
+  let waQrShownAt = 0;
+
+  function stopWaPoll() {
+    clearInterval(waPoll);
+    waPoll = null;
+  }
+
+  async function pollWaConnect() {
+    const st = await refreshWaStatus();
+    const img = $("waQrImg");
+    $("waQrMsg").textContent = st.message || "Starting...";
+    if (st.state === "qr") {
+      if (Date.now() - waQrShownAt > 5000 || img.hidden) {
+        img.src = `/api/whatsapp/qr?t=${Date.now()}`;
+        waQrShownAt = Date.now();
+      }
+      img.hidden = false;
+    } else {
+      img.hidden = true;
+    }
+    if (st.state === "connected") {
+      stopWaPoll();
+      $("waConnectDlg").close();
+      toast("WhatsApp linked. You can now send automatically.");
+      loadReminders();
+    } else if (st.state === "error" || st.state === "disconnected") {
+      stopWaPoll();
+    }
+  }
+
+  $("btnWaConnect").addEventListener("click", guard(async () => {
+    $("waQrImg").hidden = true;
+    $("waQrMsg").textContent = "Starting WhatsApp Web...";
+    $("waConnectDlg").showModal();
+    await api("/api/whatsapp/connect", { method: "POST" });
+    stopWaPoll();
+    waPoll = setInterval(pollWaConnect, 2000);
+    pollWaConnect();
+  }));
+  $("waConnectDlg").addEventListener("close", stopWaPoll);
+
+  $("btnWaDisconnect").addEventListener("click", guard(async () => {
+    if (!confirm("Unlink WhatsApp from this app? You will need to scan the QR code again to reconnect.")) return;
+    await api("/api/whatsapp/disconnect?forget=true", { method: "POST" });
+    toast("WhatsApp unlinked. Reminders use click-to-chat.");
+    loadReminders();
+  }));
+
+  async function sendNow(r) {
+    toast(`Sending to ${r.name}...`);
+    try {
+      const res = await api(`/api/reminders/send/${encodeURIComponent(r.payment_id)}`, { method: "POST" });
+      toast(res.success ? `Sent to ${r.name}.` : `Failed for ${r.name}: ${res.error}`, !res.success);
+    } catch (e) {
+      toast(e.message, true);
+    }
+    loadReminders();
+  }
+
+  let autoSending = false;
+  let autoStop = false;
+
+  $("btnAutoSend").addEventListener("click", guard(async () => {
+    const button = $("btnAutoSend");
+    if (autoSending) {
+      autoStop = true;
+      button.textContent = "Stopping...";
+      return;
+    }
+    const list = waQueueManager.buildQueue();
+    if (!list.length) return toast("No pending reminders to send.", true);
+    const room = Math.max(0, waStatus.daily_cap - waStatus.sent_today);
+    if (!room) return toast(`Daily auto-send limit (${waStatus.daily_cap}) reached. Use Open WhatsApp for the rest.`, true);
+    const batch = list.slice(0, room);
+    if (!confirm(`Auto-send ${batch.length} reminder(s) from the linked WhatsApp number?\n\n` +
+        "There is a 5-15 second pause between messages, so this takes a few minutes. Keep this page open.")) return;
+    autoSending = true;
+    autoStop = false;
+    button.textContent = "Stop auto-send";
+    let ok = 0, bad = 0;
+    try {
+      for (const r of batch) {
+        if (autoStop) break;
+        toast(`Sending ${ok + bad + 1} of ${batch.length}: ${r.name}...`);
+        try {
+          const res = await api(`/api/reminders/send/${encodeURIComponent(r.payment_id)}`, { method: "POST" });
+          if (res.success) ok++; else bad++;
+        } catch (e) {
+          bad++;
+          toast(e.message, true);
+          break;   // not connected / limit reached: stop instead of failing every row
+        }
+      }
+    } finally {
+      autoSending = false;
+      button.textContent = "Auto-send all";
+      toast(`Auto-send finished: ${ok} sent, ${bad} failed.`, bad > 0);
+      await loadReminders();
+    }
+  }));
+
   initDateBadge();
   brand();
   route();

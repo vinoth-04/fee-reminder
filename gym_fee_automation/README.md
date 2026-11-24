@@ -29,6 +29,7 @@ Open:
 1. **Import** members from any Excel/CSV file. Columns are auto-detected. You confirm or fix the mapping, tick the due-date confirmation, and import.
 2. **Payments > Generate billing** once a month. This creates a Pending payment per active member. Nothing counts as pending until you generate it.
 3. **Reminders** shows Overdue, Due today and Due soon. Click *Open WhatsApp*, check the message, press Send in WhatsApp, then *Mark sent*.
+   - **Optional auto-send:** on the Reminders page click *Connect WhatsApp* and scan the QR (WhatsApp > Linked devices). Then use *Send now* per row or *Auto-send all*. Needs `pip install playwright` and Google Chrome (or `playwright install chromium`). It is unofficial and can get a number banned, so there is a daily limit (default 40, `WHATSAPP_DAILY_CAP`) and a 5-15 s pause between messages. Click-to-chat always works without it.
 4. When a member pays, **Payments > Mark paid**. Reminders for that month stop and the member's next due date moves forward a month.
 
 The scheduler runs daily at the time set in Settings (default 09:00) and once at startup, so a PC that was off still catches up. It only prepares reminders; it never sends.
@@ -61,7 +62,7 @@ app/main.py                      app, error handling, pages
 app/routes/                      member, payment, reminder, upload, dashboard (reports + settings)
 app/services/excel_service.py    workbook read/write, locking, atomic save, backups
 app/services/excel_upload_service.py, column_detection_service.py, due_date_service.py
-app/services/member_service.py, payment_service.py, reminder_service.py, whatsapp_service.py, validators.py
+app/services/member_service.py, payment_service.py, reminder_service.py, whatsapp_service.py (click-to-chat links), invoice_service.py, validators.py
 app/scheduler/jobs.py            APScheduler daily job
 templates/ static/               dashboard and import pages
 test_import.py                   end-to-end tests
